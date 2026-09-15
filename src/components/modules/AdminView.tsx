@@ -15,7 +15,11 @@ import {
 import { db } from '../../db/store';
 import { User, SectorConfig } from '../../types';
 
-export const AdminView: React.FC = () => {
+export interface AdminViewProps {
+  onNavigate?: (view: string) => void;
+}
+
+export const AdminView: React.FC<AdminViewProps> = ({ onNavigate }) => {
   const [activeSubTab, setActiveSubTab] = useState<'technicians' | 'sla' | 'sectors' | 'backup'>('backup');
   const [backupNotice, setBackupNotice] = useState('');
 
@@ -165,13 +169,22 @@ export const AdminView: React.FC = () => {
       {/* TAB: TECHNICIANS */}
       {activeSubTab === 'technicians' && (
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                 Equipe Técnica e Suporte (CPD)
               </h3>
               <p className="text-slate-500">Técnicos habilitados para atendimento e laudo de ordens de serviço</p>
             </div>
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('equipe')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors self-start sm:self-auto shadow-xs"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Gestão Completa da Equipe (CRUD)</span>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -219,9 +232,23 @@ export const AdminView: React.FC = () => {
       {/* TAB: SECTORS */}
       {activeSubTab === 'sectors' && (
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 text-xs">
-          <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-            Gerências e Setores Atendidos (SDU Leste)
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                Gerências e Setores Atendidos (SDU Leste)
+              </h3>
+              <p className="text-slate-500">Unidades organizacionais da prefeitura vinculadas ao suporte do CPD</p>
+            </div>
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('gerencias')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors self-start sm:self-auto shadow-xs"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Gestão Completa de Gerências (CRUD)</span>
+              </button>
+            )}
+          </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {sectors.map((sec) => (

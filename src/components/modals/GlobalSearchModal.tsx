@@ -6,8 +6,9 @@ import { STATUS_MAP } from '../../utils/formatters';
 interface GlobalSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectOrder: (orderId: string) => void;
-  onSelectEquipment: () => void;
+  onSelectOrder?: (orderId: string) => void;
+  onSelectEquipment?: () => void;
+  onNavigate?: (view: string, orderId?: string) => void;
 }
 
 export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
@@ -15,6 +16,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onClose,
   onSelectOrder,
   onSelectEquipment,
+  onNavigate,
 }) => {
   const [query, setQuery] = useState('');
 
@@ -121,7 +123,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                     <div
                       key={order.id}
                       onClick={() => {
-                        onSelectOrder(order.id);
+                        if (onNavigate) {
+                          onNavigate('order-detail', order.id);
+                        } else if (onSelectOrder) {
+                          onSelectOrder(order.id);
+                        }
                         onClose();
                       }}
                       className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-blue-200 dark:hover:border-slate-700 transition-colors"
@@ -162,7 +168,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                   <div
                     key={eq.id}
                     onClick={() => {
-                      onSelectEquipment();
+                      if (onNavigate) {
+                        onNavigate('equipment');
+                      } else if (onSelectEquipment) {
+                        onSelectEquipment();
+                      }
                       onClose();
                     }}
                     className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
@@ -200,7 +210,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                 {results.users.map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50"
+                    onClick={() => {
+                      if (onNavigate) {
+                        onNavigate('equipe');
+                      }
+                      onClose();
+                    }}
+                    className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                   >
                     <img
                       src={u.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80'}

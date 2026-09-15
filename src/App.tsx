@@ -15,6 +15,8 @@ import { EquipmentView } from './components/modules/EquipmentView';
 import { ReportsView } from './components/modules/ReportsView';
 import { PublicConsultationView } from './components/modules/PublicConsultationView';
 import { AdminView } from './components/modules/AdminView';
+import { SectorsView } from './components/modules/SectorsView';
+import { TechniciansView } from './components/modules/TechniciansView';
 
 // Modals
 import { GlobalSearchModal } from './components/modals/GlobalSearchModal';
@@ -148,6 +150,18 @@ export default function App() {
               />
             )}
 
+            {(currentView === 'gerencias' || currentView === 'sectors') && (
+              <SectorsView
+                onNavigate={handleNavigate}
+              />
+            )}
+
+            {(currentView === 'equipe' || currentView === 'technicians') && (
+              <TechniciansView
+                onNavigate={handleNavigate}
+              />
+            )}
+
             {currentView === 'reports' && (
               <ReportsView />
             )}
@@ -159,7 +173,7 @@ export default function App() {
             )}
 
             {currentView === 'admin' && (
-              <AdminView />
+              <AdminView onNavigate={handleNavigate} />
             )}
           </div>
         </main>

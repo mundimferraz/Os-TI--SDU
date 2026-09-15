@@ -9,6 +9,9 @@ export const INITIAL_USERS: User[] = [
     sector: 'Setor de TI / CPD',
     registration: '84910-2',
     phone: '(86) 3215-7510',
+    specialty: 'Coordenação Geral & Infraestrutura',
+    status: 'ativo',
+    joinedDate: '2019-02-10',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
   },
   {
@@ -19,6 +22,9 @@ export const INITIAL_USERS: User[] = [
     sector: 'Setor de TI / CPD',
     registration: '92104-5',
     phone: '(86) 3215-7512',
+    specialty: 'Manutenção de Hardware & Desktops',
+    status: 'ativo',
+    joinedDate: '2021-06-15',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
   },
   {
@@ -29,6 +35,9 @@ export const INITIAL_USERS: User[] = [
     sector: 'Setor de TI / CPD',
     registration: '93452-1',
     phone: '(86) 3215-7513',
+    specialty: 'Redes de Computadores & Nobreaks',
+    status: 'ativo',
+    joinedDate: '2022-01-20',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
   },
   {
@@ -39,6 +48,9 @@ export const INITIAL_USERS: User[] = [
     sector: 'Setor de TI / CPD',
     registration: '95112-8',
     phone: '(86) 3215-7514',
+    specialty: 'Impressoras, Periféricos & Sistemas',
+    status: 'ativo',
+    joinedDate: '2023-04-03',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
   },
   {
@@ -49,6 +61,8 @@ export const INITIAL_USERS: User[] = [
     sector: 'Gabinete do Superintendente',
     registration: '77219-0',
     phone: '(86) 3215-7501',
+    status: 'ativo',
+    joinedDate: '2018-03-01',
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
   },
   {
@@ -59,19 +73,93 @@ export const INITIAL_USERS: User[] = [
     sector: 'Gerência de Obras e Serviços Públicos (GOSP)',
     registration: '68114-3',
     phone: '(86) 3215-7530',
+    status: 'ativo',
+    joinedDate: '2016-08-12',
     avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
   },
 ];
 
 export const INITIAL_SECTORS: SectorConfig[] = [
-  { id: 'sec-1', name: 'Gerência de Obras e Serviços Públicos', abbreviation: 'GOSP', headName: 'Eng. Roberto Alencar', phone: '(86) 3215-7530' },
-  { id: 'sec-2', name: 'Gerência de Habitação e Regularização Fundiária', abbreviation: 'GHRF', headName: 'Mariana Fontenele', phone: '(86) 3215-7540' },
-  { id: 'sec-3', name: 'Gerência de Fiscalização e Posturas', abbreviation: 'GFP', headName: 'Cap. Valdir Soares', phone: '(86) 3215-7550' },
-  { id: 'sec-4', name: 'Gerência de Meio Ambiente', abbreviation: 'GMA', headName: 'Beatriz Vasconcelos', phone: '(86) 3215-7560' },
-  { id: 'sec-5', name: 'Gerência Financeira e Contábil', abbreviation: 'GFC', headName: 'Francisco Chagas', phone: '(86) 3215-7520' },
-  { id: 'sec-6', name: 'Gerência de Protocolo e Atendimento', abbreviation: 'GPA', headName: 'Socorro Mendes', phone: '(86) 3215-7505' },
-  { id: 'sec-7', name: 'Gabinete do Superintendente', abbreviation: 'GAB', headName: 'Superintendência SDU Leste', phone: '(86) 3215-7501' },
-  { id: 'sec-8', name: 'Setor de TI / CPD', abbreviation: 'CPD', headName: 'Carlos Eduardo Santos', phone: '(86) 3215-7510' },
+  { 
+    id: 'sec-1', 
+    name: 'Gerência de Obras e Serviços Públicos', 
+    abbreviation: 'GOSP', 
+    headName: 'Eng. Roberto Alencar', 
+    phone: '(86) 3215-7530',
+    email: 'gosp.sdul@teresina.pi.gov.br',
+    location: 'Bloco A - Térreo, Sala 102',
+    description: 'Responsável pela execução e fiscalização de obras viárias, drenagem e serviços públicos urbanos da Zona Leste.'
+  },
+  { 
+    id: 'sec-2', 
+    name: 'Gerência de Habitação e Regularização Fundiária', 
+    abbreviation: 'GHRF', 
+    headName: 'Mariana Fontenele', 
+    phone: '(86) 3215-7540',
+    email: 'habitacao.sdul@teresina.pi.gov.br',
+    location: 'Bloco B - 1º Andar, Sala 204',
+    description: 'Atendimento a programas habitacionais, titulação de imóveis e regularização urbana.'
+  },
+  { 
+    id: 'sec-3', 
+    name: 'Gerência de Fiscalização e Posturas', 
+    abbreviation: 'GFP', 
+    headName: 'Cap. Valdir Soares', 
+    phone: '(86) 3215-7550',
+    email: 'fiscalizacao.sdul@teresina.pi.gov.br',
+    location: 'Bloco A - Térreo, Sala 106',
+    description: 'Fiscalização de obras particulares, ocupação do solo, calçadas e cumprimento do código de posturas.'
+  },
+  { 
+    id: 'sec-4', 
+    name: 'Gerência de Meio Ambiente', 
+    abbreviation: 'GMA', 
+    headName: 'Beatriz Vasconcelos', 
+    phone: '(86) 3215-7560',
+    email: 'meioambiente.sdul@teresina.pi.gov.br',
+    location: 'Bloco B - 1º Andar, Sala 208',
+    description: 'Autorizações de poda, fiscalização ambiental, arborização e preservação de áreas verdes da Zona Leste.'
+  },
+  { 
+    id: 'sec-5', 
+    name: 'Gerência Financeira e Contábil', 
+    abbreviation: 'GFC', 
+    headName: 'Francisco Chagas', 
+    phone: '(86) 3215-7520',
+    email: 'financeiro.sdul@teresina.pi.gov.br',
+    location: 'Bloco C - 2º Andar, Sala 301',
+    description: 'Gestão orçamentária, empenhos, liquidação de despesas e prestação de contas da SDU Leste.'
+  },
+  { 
+    id: 'sec-6', 
+    name: 'Gerência de Protocolo e Atendimento', 
+    abbreviation: 'GPA', 
+    headName: 'Socorro Mendes', 
+    phone: '(86) 3215-7505',
+    email: 'protocolo.sdul@teresina.pi.gov.br',
+    location: 'Hall de Entrada Principal - Térreo',
+    description: 'Recepção e triagem de cidadãos, abertura de processos administrativos e distribuição de requerimentos.'
+  },
+  { 
+    id: 'sec-7', 
+    name: 'Gabinete do Superintendente', 
+    abbreviation: 'GAB', 
+    headName: 'Superintendência SDU Leste', 
+    phone: '(86) 3215-7501',
+    email: 'gabinete.sdul@teresina.pi.gov.br',
+    location: 'Bloco C - 2º Andar, Gabinete Central',
+    description: 'Direção geral, despacho de decisões colegiadas e representação institucional da Superintendência.'
+  },
+  { 
+    id: 'sec-8', 
+    name: 'Setor de TI / CPD', 
+    abbreviation: 'CPD', 
+    headName: 'Carlos Eduardo Santos', 
+    phone: '(86) 3215-7510',
+    email: 'ti.sduleste@teresina.pi.gov.br',
+    location: 'Bloco C - Subsolo Técnico / CPD',
+    description: 'Suporte tecnológico, infraestrutura de redes, manutenção preventiva e corretiva de computadores e impressoras.'
+  },
 ];
 
 export const INITIAL_EQUIPMENTS: Equipment[] = [

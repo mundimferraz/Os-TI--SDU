@@ -48,14 +48,55 @@ class DatabaseStore {
     }
     if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
+    } else {
+      // Enrich existing users if missing specialty/status
+      try {
+        const storedUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || '[]');
+        let updated = false;
+        const enriched = storedUsers.map((u: User) => {
+          const initial = INITIAL_USERS.find((init) => init.id === u.id);
+          if (initial && (!u.specialty || !u.status)) {
+            updated = true;
+            return { ...initial, ...u, specialty: u.specialty || initial.specialty, status: u.status || 'ativo' };
+          }
+          return u;
+        });
+        if (updated) {
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(enriched));
+        }
+      } catch {
+        // ignore
+      }
     }
+
     if (!localStorage.getItem(STORAGE_KEYS.CURRENT_USER)) {
       // Default to Gestor/Admin Carlos Eduardo Santos for rich preview
       localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(INITIAL_USERS[0]));
     }
+
     if (!localStorage.getItem(STORAGE_KEYS.SECTORS)) {
       localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(INITIAL_SECTORS));
+    } else {
+      // Enrich existing sectors if missing location/email
+      try {
+        const storedSectors = JSON.parse(localStorage.getItem(STORAGE_KEYS.SECTORS) || '[]');
+        let updated = false;
+        const enriched = storedSectors.map((s: SectorConfig) => {
+          const initial = INITIAL_SECTORS.find((init) => init.id === s.id);
+          if (initial && (!s.location || !s.email)) {
+            updated = true;
+            return { ...initial, ...s, location: s.location || initial.location, email: s.email || initial.email, description: s.description || initial.description };
+          }
+          return s;
+        });
+        if (updated) {
+          localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(enriched));
+        }
+      } catch {
+        // ignore
+      }
     }
+
     if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) {
       localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
     }
@@ -91,8 +132,75 @@ class DatabaseStore {
     return data ? JSON.parse(data) : INITIAL_USERS;
   }
 
+  public getUserById(id: string): User | undefined {
+    return this.getUsers().find((u) => u.id === id);
+  }
+
   public getTechnicians(): User[] {
-    return this.getUsers().filter((u) => u.role === 'tecnico' || u.role === 'admin');
+    return this.getUsers().filter((u) => u.role === 'tecnico' || u.role === 'admin' || u.role === 'gestor');
+  }
+
+  public createUser(userData: Omit<User, 'id'>): User {
+    const users = this.getUsers();
+    const newUser: User = {
+      ...userData,
+      id: `usr-${Date.now()}`,
+      status: userData.status || 'ativo',
+      joinedDate: userData.joinedDate || new Date().toISOString().slice(0, 10),
+    };
+    users.push(newUser);
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    this.notify();
+    return newUser;
+  }
+
+  public updateUser(id: string, partial: Partial<User>): boolean {
+    const users = this.getUsers();
+    const idx = users.findIndex((u) => u.id === id);
+    if (idx === -1) return false;
+
+    users[idx] = { ...users[idx], ...partial };
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+
+    // If updating current active user, sync current user too
+    const currentUser = this.getCurrentUser();
+    if (currentUser.id === id) {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(users[idx]));
+    }
+
+    this.notify();
+    return true;
+  }
+
+  public deleteUser(id: string): { success: boolean; message?: string } {
+    const currentUser = this.getCurrentUser();
+    if (currentUser.id === id) {
+      return { success: false, message: 'Não é possível excluir o usuário da sessão ativa atual. Alterne para outro perfil no cabeçalho antes de excluir.' };
+    }
+
+    const users = this.getUsers();
+    const userToDelete = users.find((u) => u.id === id);
+    if (!userToDelete) {
+      return { success: false, message: 'Usuário não encontrado.' };
+    }
+
+    // Check if user has active assigned orders
+    const orders = this.getOrders();
+    const activeAssigned = orders.filter(
+      (o) => o.technician?.id === id && !['resolvida', 'entregue', 'fechada', 'cancelada'].includes(o.status)
+    );
+
+    if (activeAssigned.length > 0) {
+      return {
+        success: false,
+        message: `Não é possível excluir: o técnico possui ${activeAssigned.length} chamado(s) em andamento. Reatribua as ordens antes de excluir.`
+      };
+    }
+
+    const updated = users.filter((u) => u.id !== id);
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updated));
+    this.notify();
+    return { success: true };
   }
 
   // Orders
@@ -443,6 +551,62 @@ class DatabaseStore {
   public getSectors(): SectorConfig[] {
     const data = localStorage.getItem(STORAGE_KEYS.SECTORS);
     return data ? JSON.parse(data) : INITIAL_SECTORS;
+  }
+
+  public getSectorById(id: string): SectorConfig | undefined {
+    return this.getSectors().find((s) => s.id === id);
+  }
+
+  public createSector(sectorData: Omit<SectorConfig, 'id'>): SectorConfig {
+    const sectors = this.getSectors();
+    const newSector: SectorConfig = {
+      ...sectorData,
+      id: `sec-${Date.now()}`,
+    };
+    sectors.push(newSector);
+    localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(sectors));
+    this.notify();
+    return newSector;
+  }
+
+  public updateSector(id: string, partial: Partial<SectorConfig>): boolean {
+    const sectors = this.getSectors();
+    const idx = sectors.findIndex((s) => s.id === id);
+    if (idx === -1) return false;
+
+    sectors[idx] = { ...sectors[idx], ...partial };
+    localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(sectors));
+    this.notify();
+    return true;
+  }
+
+  public deleteSector(id: string): { success: boolean; message?: string } {
+    const sectors = this.getSectors();
+    const sector = sectors.find((s) => s.id === id);
+    if (!sector) {
+      return { success: false, message: 'Gerência não encontrada.' };
+    }
+
+    // Check if there are active service orders linked to this sector
+    const orders = this.getOrders();
+    const activeLinkedOrders = orders.filter(
+      (o) =>
+        (o.requester.sector.toLowerCase().includes(sector.abbreviation.toLowerCase()) ||
+         o.requester.sector.toLowerCase().includes(sector.name.toLowerCase())) &&
+        !['resolvida', 'entregue', 'fechada', 'cancelada'].includes(o.status)
+    );
+
+    if (activeLinkedOrders.length > 0) {
+      return {
+        success: false,
+        message: `Não é possível excluir: existem ${activeLinkedOrders.length} Ordem(ns) de Serviço ativas abertas por esta gerência.`
+      };
+    }
+
+    const updated = sectors.filter((s) => s.id !== id);
+    localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(updated));
+    this.notify();
+    return { success: true };
   }
 
   // Notifications

@@ -31,6 +31,9 @@ export interface User {
   registration: string;
   phone?: string;
   avatarUrl?: string;
+  specialty?: string;
+  status?: 'ativo' | 'inativo' | 'afastado';
+  joinedDate?: string;
 }
 
 export interface Equipment {
@@ -153,6 +156,9 @@ export interface SectorConfig {
   abbreviation: string;
   headName: string;
   phone: string;
+  email?: string;
+  location?: string;
+  description?: string;
 }
 
 export interface SLARule {
