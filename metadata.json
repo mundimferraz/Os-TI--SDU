@@ -1,0 +1,6 @@
+{
+  "name": "OS TI – SDU Leste",
+  "description": "Sistema de Gerenciamento de Ordens de Serviço do Setor de TI / CPD da SDU Leste – Prefeitura de Teresina.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
