@@ -36,9 +36,17 @@ export interface User {
   joinedDate?: string;
 }
 
+export interface EquipmentTypeConfig {
+  id: string; // Ex: 'desktop', 'notebook', 'impressora', 'nobreak', etc.
+  name: string; // Ex: 'Desktop / Computador', 'Scanner de Mesa'
+  iconName?: string; // Ex: 'Cpu', 'Laptop', 'Printer', 'Zap', 'Radio', 'Server', 'HardDrive'
+  description?: string;
+  isSystem?: boolean;
+}
+
 export interface Equipment {
   id: string;
-  type: 'desktop' | 'notebook' | 'impressora' | 'nobreak' | 'monitor' | 'switch' | 'roteador' | 'outro';
+  type: string; // Dynamic type referencing EquipmentTypeConfig.id
   brand: string;
   model: string;
   assetNumber: string; // Número de Tombamento / Patrimônio da Prefeitura

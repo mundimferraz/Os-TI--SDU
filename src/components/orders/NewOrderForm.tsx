@@ -19,15 +19,18 @@ interface NewOrderFormProps {
   currentUser: UserType;
   onNavigate: (view: string, orderId?: string) => void;
   onPrintOrder: (order: ServiceOrder) => void;
+  onPrintBlankOrder?: () => void;
 }
 
 export const NewOrderForm: React.FC<NewOrderFormProps> = ({
   currentUser,
   onNavigate,
   onPrintOrder,
+  onPrintBlankOrder,
 }) => {
   const sectors = db.getSectors();
   const existingEquipments = db.getEquipments();
+  const equipmentTypes = db.getEquipmentTypes();
 
   // Form State
   const [requesterName, setRequesterName] = useState(currentUser.role === 'solicitante' ? currentUser.name : '');
@@ -209,9 +212,23 @@ export const NewOrderForm: React.FC<NewOrderFormProps> = ({
           </div>
         </div>
 
-        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
-          Próxima: {db.getNextOrderId()}
-        </span>
+        <div className="flex items-center gap-2">
+          {onPrintBlankOrder && (
+            <button
+              type="button"
+              onClick={onPrintBlankOrder}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors"
+              title="Imprimir formulário oficial em branco em PDF para preenchimento em visita de campo"
+            >
+              <Printer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Imprimir OS em Branco (PDF)</span>
+            </button>
+          )}
+
+          <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            Próxima: {db.getNextOrderId()}
+          </span>
+        </div>
       </div>
 
       {/* Main Form */}
@@ -349,13 +366,11 @@ export const NewOrderForm: React.FC<NewOrderFormProps> = ({
                 onChange={(e) => setEquipmentType(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               >
-                <option value="desktop">Desktop / Computador</option>
-                <option value="notebook">Notebook / Laptop</option>
-                <option value="impressora">Impressora / Multifuncional</option>
-                <option value="nobreak">Nobreak / Estabilizador</option>
-                <option value="monitor">Monitor de Vídeo</option>
-                <option value="switch">Switch / Roteador / Rede</option>
-                <option value="outro">Outro periférico</option>
+                {equipmentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
               </select>
             </div>
 

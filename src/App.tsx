@@ -21,6 +21,7 @@ import { TechniciansView } from './components/modules/TechniciansView';
 // Modals
 import { GlobalSearchModal } from './components/modals/GlobalSearchModal';
 import { OrderPrintModal } from './components/orders/OrderPrintModal';
+import { BlankOrderPrintModal } from './components/orders/BlankOrderPrintModal';
 
 export default function App() {
   // DB Sync State
@@ -45,6 +46,7 @@ export default function App() {
   // Modals
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [printOrder, setPrintOrder] = useState<ServiceOrder | null>(null);
+  const [isBlankPrintOpen, setIsBlankPrintOpen] = useState(false);
 
   const currentUser = db.getCurrentUser();
 
@@ -107,6 +109,7 @@ export default function App() {
           currentUser={currentUser}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onPrintBlankOrder={() => setIsBlankPrintOpen(true)}
         />
 
         {/* Content View Area */}
@@ -117,6 +120,7 @@ export default function App() {
                 currentUser={currentUser}
                 onNavigate={handleNavigate}
                 onPrintOrder={handlePrintOrder}
+                onPrintBlankOrder={() => setIsBlankPrintOpen(true)}
               />
             )}
 
@@ -124,6 +128,7 @@ export default function App() {
               <OrderListView
                 onNavigate={handleNavigate}
                 onPrintOrder={handlePrintOrder}
+                onPrintBlankOrder={() => setIsBlankPrintOpen(true)}
               />
             )}
 
@@ -132,6 +137,7 @@ export default function App() {
                 currentUser={currentUser}
                 onNavigate={handleNavigate}
                 onPrintOrder={handlePrintOrder}
+                onPrintBlankOrder={() => setIsBlankPrintOpen(true)}
               />
             )}
 
@@ -192,10 +198,16 @@ export default function App() {
       {printOrder && (
         <OrderPrintModal
           order={printOrder}
-          isOpen={!!printOrder}
           onClose={() => setPrintOrder(null)}
+          onOpenBlankOrder={() => setIsBlankPrintOpen(true)}
         />
       )}
+
+      {/* Blank Service Order Print Modal (Official Field Sheet A4 / PDF) */}
+      <BlankOrderPrintModal
+        isOpen={isBlankPrintOpen}
+        onClose={() => setIsBlankPrintOpen(false)}
+      />
 
     </div>
   );

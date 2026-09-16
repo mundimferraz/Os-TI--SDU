@@ -1,6 +1,7 @@
 import { 
   ServiceOrder, 
   Equipment, 
+  EquipmentTypeConfig,
   User, 
   SectorConfig, 
   AppNotification, 
@@ -16,6 +17,7 @@ import {
 import { 
   INITIAL_ORDERS, 
   INITIAL_EQUIPMENTS, 
+  INITIAL_EQUIPMENT_TYPES,
   INITIAL_USERS, 
   INITIAL_SECTORS, 
   INITIAL_NOTIFICATIONS 
@@ -24,6 +26,7 @@ import {
 const STORAGE_KEYS = {
   ORDERS: 'os_ti_sdu_orders_v1',
   EQUIPMENT: 'os_ti_sdu_equipment_v1',
+  EQUIPMENT_TYPES: 'os_ti_sdu_equipment_types_v1',
   USERS: 'os_ti_sdu_users_v1',
   CURRENT_USER: 'os_ti_sdu_current_user_v1',
   SECTORS: 'os_ti_sdu_sectors_v1',
@@ -99,6 +102,10 @@ class DatabaseStore {
 
     if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) {
       localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
+    }
+
+    if (!localStorage.getItem(STORAGE_KEYS.EQUIPMENT_TYPES)) {
+      localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(INITIAL_EQUIPMENT_TYPES));
     }
   }
 
@@ -525,6 +532,15 @@ class DatabaseStore {
     return data ? JSON.parse(data) : [];
   }
 
+  public getEquipmentById(id: string): Equipment | undefined {
+    return this.getEquipments().find((e) => e.id === id);
+  }
+
+  public getEquipmentByAssetNumber(assetNumber: string): Equipment | undefined {
+    const q = assetNumber.trim().toLowerCase();
+    return this.getEquipments().find((e) => e.assetNumber.toLowerCase() === q);
+  }
+
   public createEquipment(eq: Omit<Equipment, 'id'>): Equipment {
     const equipments = this.getEquipments();
     const newEq: Equipment = {
@@ -537,14 +553,116 @@ class DatabaseStore {
     return newEq;
   }
 
-  public updateEquipment(id: string, partial: Partial<Equipment>): void {
+  public updateEquipment(id: string, partial: Partial<Equipment>): boolean {
     const equipments = this.getEquipments();
     const idx = equipments.findIndex((e) => e.id === id);
     if (idx !== -1) {
       equipments[idx] = { ...equipments[idx], ...partial };
       localStorage.setItem(STORAGE_KEYS.EQUIPMENT, JSON.stringify(equipments));
       this.notify();
+      return true;
     }
+    return false;
+  }
+
+  public deleteEquipment(id: string): { success: boolean; message?: string } {
+    const equipments = this.getEquipments();
+    const eq = equipments.find((e) => e.id === id);
+    if (!eq) {
+      return { success: false, message: 'Equipamento não encontrado.' };
+    }
+
+    // Check if there are active service orders linked to this equipment
+    const orders = this.getOrders();
+    const activeLinkedOrders = orders.filter(
+      (o) =>
+        o.equipment.assetNumber.trim().toLowerCase() === eq.assetNumber.trim().toLowerCase() &&
+        !['resolvida', 'entregue', 'fechada', 'cancelada'].includes(o.status)
+    );
+
+    if (activeLinkedOrders.length > 0) {
+      return {
+        success: false,
+        message: `Não é possível excluir: existem ${activeLinkedOrders.length} Ordem(ns) de Serviço ativas em andamento para este equipamento (Patrimônio ${eq.assetNumber}).`
+      };
+    }
+
+    const updated = equipments.filter((e) => e.id !== id);
+    localStorage.setItem(STORAGE_KEYS.EQUIPMENT, JSON.stringify(updated));
+    this.notify();
+    return { success: true };
+  }
+
+  // Equipment Types
+  public getEquipmentTypes(): EquipmentTypeConfig[] {
+    const data = localStorage.getItem(STORAGE_KEYS.EQUIPMENT_TYPES);
+    return data ? JSON.parse(data) : INITIAL_EQUIPMENT_TYPES;
+  }
+
+  public getEquipmentTypeById(id: string): EquipmentTypeConfig | undefined {
+    return this.getEquipmentTypes().find((t) => t.id.toLowerCase() === id.toLowerCase());
+  }
+
+  public createEquipmentType(typeData: Omit<EquipmentTypeConfig, 'id'> & { id?: string }): EquipmentTypeConfig {
+    const types = this.getEquipmentTypes();
+    const rawId = (typeData.id || typeData.name)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '_')
+      .slice(0, 30);
+    
+    let finalId = rawId || `tipo_${Date.now()}`;
+    if (types.some((t) => t.id === finalId)) {
+      finalId = `${finalId}_${Date.now().toString().slice(-4)}`;
+    }
+
+    const newType: EquipmentTypeConfig = {
+      id: finalId,
+      name: typeData.name.trim(),
+      iconName: typeData.iconName || 'HardDrive',
+      description: typeData.description?.trim() || '',
+      isSystem: false,
+    };
+
+    types.push(newType);
+    localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(types));
+    this.notify();
+    return newType;
+  }
+
+  public updateEquipmentType(id: string, partial: Partial<EquipmentTypeConfig>): boolean {
+    const types = this.getEquipmentTypes();
+    const idx = types.findIndex((t) => t.id === id);
+    if (idx === -1) return false;
+
+    types[idx] = { ...types[idx], ...partial };
+    localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(types));
+    this.notify();
+    return true;
+  }
+
+  public deleteEquipmentType(id: string): { success: boolean; message?: string } {
+    const types = this.getEquipmentTypes();
+    const t = types.find((item) => item.id === id);
+    if (!t) {
+      return { success: false, message: 'Tipo de equipamento não encontrado.' };
+    }
+
+    // Check if any equipment is currently using this type
+    const equipments = this.getEquipments();
+    const linked = equipments.filter((e) => e.type.toLowerCase() === id.toLowerCase());
+    if (linked.length > 0) {
+      return {
+        success: false,
+        message: `Não é possível excluir o tipo "${t.name}": existem ${linked.length} equipamento(s) no parque cadastrados com este tipo.`
+      };
+    }
+
+    const updated = types.filter((item) => item.id !== id);
+    localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(updated));
+    this.notify();
+    return { success: true };
   }
 
   // Sectors
@@ -684,6 +802,7 @@ class DatabaseStore {
   public resetToDefaults(): void {
     localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
     localStorage.setItem(STORAGE_KEYS.EQUIPMENT, JSON.stringify(INITIAL_EQUIPMENTS));
+    localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(INITIAL_EQUIPMENT_TYPES));
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(INITIAL_USERS[0]));
     localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(INITIAL_SECTORS));
@@ -693,10 +812,11 @@ class DatabaseStore {
 
   public exportBackupJSON(): string {
     const backup = {
-      version: '1.0',
+      version: '1.1',
       exportDate: new Date().toISOString(),
       orders: this.getOrders(),
       equipments: this.getEquipments(),
+      equipmentTypes: this.getEquipmentTypes(),
       users: this.getUsers(),
       sectors: this.getSectors(),
     };
@@ -712,8 +832,14 @@ class DatabaseStore {
       if (data.equipments && Array.isArray(data.equipments)) {
         localStorage.setItem(STORAGE_KEYS.EQUIPMENT, JSON.stringify(data.equipments));
       }
+      if (data.equipmentTypes && Array.isArray(data.equipmentTypes)) {
+        localStorage.setItem(STORAGE_KEYS.EQUIPMENT_TYPES, JSON.stringify(data.equipmentTypes));
+      }
       if (data.users && Array.isArray(data.users)) {
         localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(data.users));
+      }
+      if (data.sectors && Array.isArray(data.sectors)) {
+        localStorage.setItem(STORAGE_KEYS.SECTORS, JSON.stringify(data.sectors));
       }
       this.notify();
       return true;

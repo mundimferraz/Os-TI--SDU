@@ -20,11 +20,13 @@ import { STATUS_MAP, PRIORITY_MAP, formatDateBR, evaluateSLA } from '../../utils
 interface OrderListViewProps {
   onNavigate: (view: string, orderId?: string) => void;
   onPrintOrder: (order: ServiceOrder) => void;
+  onPrintBlankOrder?: () => void;
 }
 
 export const OrderListView: React.FC<OrderListViewProps> = ({
   onNavigate,
   onPrintOrder,
+  onPrintBlankOrder,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -123,7 +125,18 @@ export const OrderListView: React.FC<OrderListViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onPrintBlankOrder && (
+            <button
+              onClick={onPrintBlankOrder}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700"
+              title="Gerar e imprimir formulário oficial de Ordem de Serviço em branco em formato A4/PDF"
+            >
+              <Printer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Imprimir OS em Branco (PDF)</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors"

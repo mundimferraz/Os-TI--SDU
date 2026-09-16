@@ -6,9 +6,10 @@ import { formatDateBR, formatDateOnlyBR, STATUS_MAP, PRIORITY_MAP, CATEGORY_MAP 
 interface OrderPrintModalProps {
   order: ServiceOrder;
   onClose: () => void;
+  onOpenBlankOrder?: () => void;
 }
 
-export const OrderPrintModal: React.FC<OrderPrintModalProps> = ({ order, onClose }) => {
+export const OrderPrintModal: React.FC<OrderPrintModalProps> = ({ order, onClose, onOpenBlankOrder }) => {
   const [printMode, setPrintMode] = useState<'sheet' | 'tag'>('sheet');
 
   const handlePrint = () => {
@@ -24,7 +25,7 @@ export const OrderPrintModal: React.FC<OrderPrintModalProps> = ({ order, onClose
       <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto">
         
         {/* Modal Toolbar (hidden in print) */}
-        <div className="print:hidden flex items-center justify-between px-6 py-3.5 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="print:hidden flex flex-wrap items-center justify-between gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPrintMode('sheet')}
@@ -48,6 +49,20 @@ export const OrderPrintModal: React.FC<OrderPrintModalProps> = ({ order, onClose
               <Tag className="w-4 h-4" />
               <span>Etiqueta de Equipamento</span>
             </button>
+
+            {onOpenBlankOrder && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenBlankOrder();
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 transition-colors border border-slate-300 dark:border-slate-600"
+                title="Abrir formulário de Ordem de Serviço em branco para impressão"
+              >
+                <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Ficha em Branco (PDF)</span>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-3">

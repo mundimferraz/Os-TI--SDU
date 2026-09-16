@@ -1,4 +1,17 @@
-import { ServiceOrder, Equipment, User, SectorConfig, AppNotification } from '../types';
+import { ServiceOrder, Equipment, EquipmentTypeConfig, User, SectorConfig, AppNotification } from '../types';
+
+export const INITIAL_EQUIPMENT_TYPES: EquipmentTypeConfig[] = [
+  { id: 'desktop', name: 'Desktop / Computador', iconName: 'Cpu', description: 'Gabinete/Torre de computador de mesa', isSystem: true },
+  { id: 'notebook', name: 'Notebook / Laptop', iconName: 'Laptop', description: 'Computador portátil institucional', isSystem: true },
+  { id: 'impressora', name: 'Impressora / Multifuncional', iconName: 'Printer', description: 'Impressora laser, jato de tinta ou térmica', isSystem: true },
+  { id: 'nobreak', name: 'Nobreak / Estabilizador', iconName: 'Zap', description: 'Proteção elétrica e bateria de backup', isSystem: true },
+  { id: 'monitor', name: 'Monitor de Vídeo', iconName: 'Monitor', description: 'Tela LED/LCD individual', isSystem: true },
+  { id: 'switch', name: 'Switch de Rede', iconName: 'Radio', description: 'Distribuidor de rede cabeada Ethernet', isSystem: true },
+  { id: 'roteador', name: 'Roteador / Wi-Fi', iconName: 'Radio', description: 'Ponto de acesso e roteamento sem fio', isSystem: true },
+  { id: 'scanner', name: 'Scanner de Mesa', iconName: 'Printer', description: 'Digitalizador de processos e documentos', isSystem: false },
+  { id: 'servidor', name: 'Servidor / Storage', iconName: 'Server', description: 'Servidor de banco de dados ou arquivos', isSystem: false },
+  { id: 'outro', name: 'Outro Periférico', iconName: 'HardDrive', description: 'Projetor, periférico ou equipamento diverso', isSystem: true },
+];
 
 export const INITIAL_USERS: User[] = [
   {

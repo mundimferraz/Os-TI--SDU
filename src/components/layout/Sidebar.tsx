@@ -12,7 +12,8 @@ import {
   Clock, 
   Phone,
   CheckCircle2,
-  X
+  X,
+  Printer
 } from 'lucide-react';
 import { User } from '../../types';
 import { db } from '../../db/store';
@@ -23,6 +24,7 @@ interface SidebarProps {
   currentUser: User;
   isOpen: boolean;
   onClose: () => void;
+  onPrintBlankOrder?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -31,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentUser,
   isOpen,
   onClose,
+  onPrintBlankOrder,
 }) => {
   const orders = db.getOrders();
   const openCount = orders.filter((o) => ['aberta', 'triagem', 'atribuida', 'em_andamento'].includes(o.status)).length;
@@ -195,6 +198,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 );
               })}
           </nav>
+
+          {/* Quick Action: Imprimir OS em Branco (A4 / PDF) */}
+          {onPrintBlankOrder && (
+            <div className="px-3 pt-3">
+              <button
+                onClick={() => {
+                  onPrintBlankOrder();
+                  if (isOpen) onClose();
+                }}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-blue-300 hover:text-white border border-slate-700/80 transition-all cursor-pointer shadow-xs group"
+                title="Imprimir formulário em branco oficial de Ordem de Serviço em A4 ou salvar em PDF"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                  <span>Imprimir OS em Branco</span>
+                </div>
+                <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">
+                  PDF
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Support & Institutional Contact Footer */}
